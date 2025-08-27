@@ -1,16 +1,15 @@
-# Task 6 — DaemonSet & CronJob for ToDo app
+## Validation (Logs & Checks)
 
-## Передумови
-- У кластері вже задеплоєний ToDo app у неймспейсі `mateapp`.
-- Існує ClusterIP Service `todoapp-clusterip` у `mateapp`, який віддає додаток на порті `8000` і має endpoint `/api/health`.
-  - Якщо сервіс відсутній, створіть його (приклад нижче у розділі “Додатково (опційно)”).
-
-## Деплой
-
+### A. DaemonSet: перевірка, що curl запускається кожні 5 секунд
 ```bash
-# 1) Переконайся, що неймспейс існує
-kubectl get ns mateapp || kubectl create namespace mateapp
+# Поди DaemonSet на всіх нодах
+kubectl -n mateapp get pods -l app=todoapp-daemon -o wide
 
-# 2) Застосуй маніфести
-kubectl -n mateapp apply -f .infrastructure/daemonset.yml
-kubectl -n mateapp apply -f .infrastructure/cronjob.yml
+# Візьми ім’я будь-якого пода з попереднього виводу, напр.:
+POD_DS=$(kubectl -n mateapp get pods -l app=todoapp-daemon -o jsonpath='{.items[0].metadata.name}')
+
+# Подивись останні логи (повинні з’являтись записи приблизно кожні 5 сек)
+kubectl -n mateapp logs "$POD_DS" --tail=100
+
+# За потреби — stream логів у реальному часі:
+kubectl -n mateapp logs -f "$POD_DS"
