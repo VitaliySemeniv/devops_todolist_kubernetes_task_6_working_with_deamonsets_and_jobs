@@ -13,3 +13,10 @@ kubectl -n mateapp logs "$POD_DS" --tail=100
 
 # За потреби — stream логів у реальному часі:
 kubectl -n mateapp logs -f "$POD_DS"
+
+## Validation – CronJob (кожні 4 хвилини)
+
+### 1) Перевірити наявність CronJob і Job-ів
+```bash
+kubectl -n mateapp get cronjob
+kubectl -n mateapp get jobs --sort-by=.metadata.creationTimestamp
